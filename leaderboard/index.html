@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Leaderboard</title>
+    <link rel="stylesheet" type="text/css" href="default.css">
+  </head>
+  <body>
+    <p><span id="last_updated"></span> <span>(<a href="matches.html">matches</a>, <a href="stats.html">stats</a>)</span></p>
+    <table id="table">
+      <thead>
+        <tr>
+          <th>Standing</th>
+          <th>Name</th>
+          <th>Rating</th>
+          <th>Match</th>
+          <th>Win</th>
+          <th>Lose</th>
+          <th>Draftbot</th>
+          <th>Club member</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+      </tbody>
+    </table>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://tablesorter.com/__jquery.tablesorter.min.js"></script>
+    <script src="data.js"></script>
+    <script src="util.js"></script>
+    <script>
+      (function() {
+
+      function addTd(tr, tdContent) {
+        var td = document.createElement("td");
+        td.innerHTML = tdContent;
+        tr.appendChild(td);
+      }
+      for (var i = 0; i < Data.Players.length; ++i) {
+        var p = Data.Players[i];
+        var tr = document.createElement("tr");
+        addTd(tr, i + 1);
+        addTd(tr, "<a href=\"player.html#!" + p.name + "\">" + p.name + "</a>");
+        addTd(tr, p.rating);
+        addTd(tr, p.matches.length);
+        addTd(tr, p.win);
+        addTd(tr, p.lose);
+        addTd(tr, p.draftbot);
+        addTd(tr, p.nlc ? "<span style=\"color:green;\">yes</span>" :
+                          "<span style=\"color:red;\">no</span>");
+        document.getElementById('tbody').appendChild(tr);
+      }
+      $(function () {
+        $('#table').tablesorter();
+      });
+      document.getElementById('last_updated').innerHTML += "Last updated: " + Util.FormatTime(Data.LastUpdated);
+
+      })();
+    </script>
+  </body>
+</html>

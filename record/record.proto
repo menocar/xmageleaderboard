@@ -1,0 +1,20 @@
+syntax = "proto2";
+
+package record;
+
+option java_package = "mage.client.record";
+option java_outer_classname = "RecordProtos";
+
+message Match {
+  optional int32 id = 1;
+  optional string deck_type = 2;
+  optional string players = 3;
+  optional string game_type = 4;
+  optional string result = 5;
+  optional int64 start_time_msec = 6;
+  optional int64 end_time_msec = 7;
+}
+
+message Matches {
+  repeated Match matches = 1;
+}

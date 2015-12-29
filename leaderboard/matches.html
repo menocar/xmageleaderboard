@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Matches</title>
+    <link rel="stylesheet" type="text/css" href="default.css">
+  </head>
+  <body>
+    <table id="table">
+      <thead>
+        <tr>
+          <th>EndTime</th>
+          <th>DeckType</th>
+          <th>GameType</th>
+          <th>Players</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+      </tbody>
+    </table>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://tablesorter.com/__jquery.tablesorter.min.js"></script>
+    <script src="data.js"></script>
+    <script src="util.js"></script>
+    <script>
+      (function() {
+
+      function addTd(tr, tdContent) {
+        var td = document.createElement("td");
+        td.innerHTML = tdContent;
+        tr.appendChild(td);
+      }
+      function cut(str) {
+        var ol = str.length;
+        str = str.substr(0, 60);
+        if (ol != str.length) {
+          str += "...";
+        }
+        return str;
+      }
+      for (var i = 0; i < Data.Matches.length; ++i) {
+        var m = Data.Matches[i];
+        var tr = document.createElement("tr");
+        addTd(tr, Util.FormatTime(m.end_time));
+        addTd(tr, cut(m.deck_type));
+        addTd(tr, m.game_type);
+        addTd(tr, m.players);
+        addTd(tr, m.result);
+        document.getElementById('tbody').appendChild(tr);
+      }
+      $(function () {
+        $('#table').tablesorter();
+      });
+
+      })();
+    </script>
+  </body>
+</html>

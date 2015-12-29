@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Stats</title>
+  </head>
+  <body>
+    <div id="rating_distribution" style="width: 900px; height: 500px;"></div>
+    <div id="draftbot_player" style="width: 900px; height: 500px;"></div>
+    <div id="draftbot_match" style="width: 900px; height: 500px;"></div>
+    <div id="num_match" style="width: 900px; height: 500px;"></div>
+    <div id="membership" style="width: 900px; height: 500px;"></div>
+    <div id="hour_distribution" style="width: 900px; height: 500px;"></div>
+    <div id="deck_type" style="width: 900px; height: 500px;"></div>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="data.js"></script>
+    <script src="util.js"></script>
+    <script>
+      (function() {
+        google.load("visualization", "1", {packages:["corechart"]});
+
+        google.setOnLoadCallback(function() {
+          var ps = [["Player", "Rating"]];
+          for (var i = 0; i < Data.Players.length; ++i) {
+            var p = Data.Players[i];
+            ps.push([p.name, p.rating]);
+          }
+          var data = google.visualization.arrayToDataTable(ps);
+          var options = {
+            title: "Rating distribution",
+            legend: {position: "none"},
+            histogram: {bucketSize: 5},
+          };
+          var chart = new google.visualization.Histogram(document.getElementById('rating_distribution'));
+          chart.draw(data, options);
+        });
+
+        google.setOnLoadCallback(function() {
+          var max = 0;
+          var draftbot = {};
+          for (var i = 0; i < Data.Players.length; ++i) {
+            var c = Data.Players[i].draftbot;
+            if (max < c) {
+              max = c;
+            }
+            draftbot[c] = (draftbot[c] || 0) + 1;
+          }
+          var ps = [["Draftbot counts", "Number of players"]];
+          for (var i = 0; i <= max; ++i) {
+            if (i in draftbot) {
+              ps.push([i + " time(s)", draftbot[i]]);
+            }
+          }
+          var data = google.visualization.arrayToDataTable(ps);
+          var options = {
+            title: "Replaced by a Draftbot",
+          };
+          var chart = new google.visualization.PieChart(document.getElementById('draftbot_player'));
+          chart.draw(data, options);
+        });
+
+        google.setOnLoadCallback(function() {
+          var max = 0;
+          var draftbot = {};
+          for (var i = 0; i < Data.Matches.length; ++i) {
+            var c = Data.Matches[i].players.split('Draftbot').length - 1;
+            if (max < c) {
+              max = c;
+            }
+            draftbot[c] = (draftbot[c] || 0) + 1;
+          }
+          var ps = [["Draftbot counts", "Number of matches"]];
+          for (var i = 0; i <= max; ++i) {
+            if (i in draftbot) {
+              ps.push([i + " draftbot(s)", draftbot[i]]);
+            }
+          }
+          var data = google.visualization.arrayToDataTable(ps);
+          var options = {
+            title: "Number of Draftbots in a match",
+          };
+          var chart = new google.visualization.PieChart(document.getElementById('draftbot_match'));
+          chart.draw(data, options);
+        });
+
+        google.setOnLoadCallback(function() {
+          var max = 0;
+          var matches = {};
+          for (var i = 0; i < Data.Players.length; ++i) {
+            var c = Data.Players[i].matches.length;
+            if (max < c) {
+              max = c;
+            }
+            matches[c] = (matches[c] || 0) + 1;
+          }
+          var ps = [["Matches played", "Number of players"]];
+          for (var i = 0; i <= max; ++i) {
+            if (i in matches) {
+              ps.push([i + " match(s)", matches[i]]);
+            }
+          }
+          var data = google.visualization.arrayToDataTable(ps);
+          var options = {
+            title: "Number of matches played",
+          };
+          var chart = new google.visualization.PieChart(document.getElementById('num_match'));
+          chart.draw(data, options);
+        });
+
+        google.setOnLoadCallback(function() {
+          var yes = 0, no = 0;
+          for (var i = 0; i < Data.Players.length; ++i) {
+            var p = Data.Players[i];
+            if (p.nlc) {
+              ++yes;
+            } else {
+              ++no;
+            }
+          }
+          var ps = [
+            ["Membership", "Number of players"],
+            ["Yes", yes],
+            ["No", no],
+          ];
+          var data = google.visualization.arrayToDataTable(ps);
+          var options = {
+            title: "No Leavers Club Membership",
+          };
+          var chart = new google.visualization.PieChart(document.getElementById('membership'));
+          chart.draw(data, options);
+        });
+
+        google.setOnLoadCallback(function() {
+          var matches = [];
+          for (var i = 0; i < 24; ++i) {
+            matches[i] = 0;
+          }
+          for (var i = 0; i < Data.Matches.length; ++i) {
+            var m = Data.Matches[i];
+            var hour = (new Date(m.start_time*1000)).getHours();
+            matches[hour]++;
+          }
+          var ps = [["Time of day", "Number of matches"]];
+          for (var i = 0; i < 24; ++i) {
+            ps.push([i, matches[i]]);
+          }
+          var data = google.visualization.arrayToDataTable(ps);
+          var options = {
+            title: "Match starts per hour",
+            hAxis: {title: "Time of day", titleTextStyle: {color: "#333"}},
+            vAxis: {minValue: 0},
+          };
+          var chart = new google.visualization.AreaChart(document.getElementById('hour_distribution'));
+          chart.draw(data, options);
+        });
+
+        google.setOnLoadCallback(function() {
+          var dates = new Util.Map();
+          var deck_type_set = new Util.Map();
+          var latestDate = new Date(0);
+          for (var i = 0; i < Data.Matches.length; ++i) {
+            var m = Data.Matches[i];
+            var date = new Date((new Date(m.start_time*1000)).toDateString());
+
+            if (latestDate.getTime() < date.getTime()) {
+              latestDate = date;
+            }
+
+            var d = dates.get(date);
+            if (d == undefined) {
+              d = new Util.Map();
+              dates.set(date, d);
+            }
+
+            var dt = m.deck_type;
+            d.set(dt, (d.get(dt) || 0) + 1);
+
+            deck_type_set.set(dt, true);
+          }
+
+          var deck_types = [];
+          for (var i = 0, ks = deck_type_set.keys(); i < ks.length; ++i) {
+            deck_types.push(ks[i]);
+          }
+          deck_types.sort(function(a, b) {
+            var d = dates.get(latestDate);
+            return (d.get(a) || 0) - (d.get(b) || 0);
+          });
+
+          var ps = [["Date"]];
+          Array.prototype.push.apply(ps[0], deck_types);
+          var ks = dates.keys();
+          for (var i = 0; i < ks.length; ++i) {
+            var k = ks[i];
+            var v = dates.get(k);
+            var p = [new Date(k)];
+            for (var j = 0, ks2 = deck_types; j < ks2.length; j++) {
+              p.push(v.get(ks2[j]) || 0);
+            }
+            ps.push(p);
+          }
+
+          var data = google.visualization.arrayToDataTable(ps);
+          var options = {
+            isStacked: true,
+            title: "Number of matches per day",
+            hAxis: {
+              title: "Date",
+              format: "M/d/yy",
+              titleTextStyle: {color: "#333"},
+            },
+            vAxis: {minValue: 0},
+          };
+          var chart = new google.visualization.AreaChart(document.getElementById('deck_type'));
+          chart.draw(data, options);
+        });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,68 @@
+@import url('http://fonts.googleapis.com/css?family=Amarante');
+
+body {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 100.0%;
+  line-height: 1;
+  color: #585858;
+  padding: 22px 10px;
+  padding-bottom: 55px;
+}
+
+::selection { background: #5f74a0; color: #fff; }
+::-moz-selection { background: #5f74a0; color: #fff; }
+::-webkit-selection { background: #5f74a0; color: #fff; }
+
+table { border-collapse: collapse; border-spacing: 0; }
+
+#table {
+  margin: 0 auto;
+  font-size: 1.0em;
+  margin-bottom: 15px;
+}
+
+#table thead {
+  cursor: pointer;
+  background: #c9dff0;
+}
+
+#table thead tr th {
+  font-weight: bold;
+  padding: 12px 30px;
+  padding-left: 42px;
+}
+
+#table thead tr th span {
+  padding-right: 20px;
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+}
+
+#table thead tr th.headerSortUp, #table thead tr th.headerSortDown {
+  background: #acc8dd;
+}
+
+#table thead tr th.headerSortUp span {
+  background-image: url('http://i.imgur.com/SP99ZPJ.png');
+}
+
+#table thead tr th.headerSortDown span {
+  background-image: url('http://i.imgur.com/RkA9MBo.png');
+}
+
+#table tbody tr {
+  color: #555;
+}
+
+#table tbody tr td {
+  text-align: center;
+  padding: 12px 10px;
+}
+
+#table tbody tr td.lalign {
+  text-align: left;
+}
+
+#table tbody tr td.nowrap {
+  white-space: nowrap;
+}

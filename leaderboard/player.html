@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title id="title"></title>
+    <link rel="stylesheet" type="text/css" href="default.css">
+  </head>
+  <body>
+    <div id="rating_transition" style="width: 900px; height: 500px"></div>
+    <table id="table">
+      <thead>
+        <tr>
+          <th>EndTime</th>
+          <th>DeckType</th>
+          <th>GameType</th>
+          <th>Players</th>
+          <th>Results</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+      </tbody>
+    </table>
+    <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    <script src="http://tablesorter.com/__jquery.tablesorter.min.js"></script>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script src="data.js"></script>
+    <script src="util.js"></script>
+    <script>
+      (function() {
+
+      var name = location.hash.substring(2);
+      var player = Data.PlayersByName[name];
+      if (player == null) {
+        return;
+      }
+
+      function addTd(tr, tdContent) {
+        var td = document.createElement("td");
+        td.innerHTML = tdContent;
+        tr.appendChild(td);
+      }
+
+      var ms = player.matches;
+      var stubs = [];
+      for (var i = 0; i < ms.length; ++i) {
+        var m = Data.MatchesByID[ms[ms.length - 1 - i]];
+        var tr = document.createElement("tr");
+        addTd(tr, Util.FormatTime(m.end_time));
+        addTd(tr, m.deck_type);
+        addTd(tr, m.game_type);
+        addTd(tr, m.players);
+        // For Result column, we add stubs and fill them later.
+        var td = document.createElement("td");
+        td.className = "lalign nowrap";
+        tr.appendChild(td);
+        stubs.push({"match" : m, "td": td});
+        document.getElementById('tbody').appendChild(tr);
+      }
+
+      var rating = 1500.0;
+      var ratings = [["Date", "Rating"]];
+      for (var i = stubs.length - 1; i >= 0; --i) {
+        var content = "";
+        for (var j = 0; j < stubs[i].match.results.length; ++j) {
+          var r = stubs[i].match.results[j];
+          var player = undefined, opponent = undefined;
+          if (r.player.name == name) {
+            player = r.player;
+            opponent = r.opponent;
+          } else if (r.opponent != undefined && r.opponent.name == name) {
+            player = r.opponent;
+            opponent = r.player;
+          }
+          if (player == undefined) {
+            continue;
+          }
+          if (content != "") {
+            content += "<br />";
+          }
+          content += "R" + r.round + " ";
+          if (player.bye) {
+            content += "Bye";
+          } else {
+            rating += player.rating;
+            ratings.push([new Date(stubs[i].match.end_time*1000), rating]);
+            var color, sign;
+            if (player.rating >= 0) {
+              color = "green";
+              sign = "+";
+            } else {
+              color = "red;"
+              sign = "";
+            }
+            content += opponent.name + " [" + player.score + "-" +
+              opponent.score + "] " + Math.floor(rating) +
+              " (<span style=\"color:" + color + "\">" + sign +
+              Math.floor(player.rating * 10.0) / 10.0 + "</span>)";
+          }
+        }
+        stubs[i].td.innerHTML = content;
+      }
+
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(function() {
+        var data = google.visualization.arrayToDataTable(ratings);
+
+        var options = {
+          title: 'Rating transition',
+          curveType: 'none',
+          legend: { position: 'bottom' }
+        };
+
+        var chart = new google.visualization.LineChart(document.getElementById('rating_transition'));
+        chart.draw(data, options);
+      });
+
+      $(function () {
+        $('#table').tablesorter();
+      });
+
+      })();
+    </script>
+  </body>
+</html>
