@@ -17,7 +17,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/proto"
-	"github.com/menocar/xmage/leaderboard/record"
+	"github.com/menocar/xmageleaderboard/record"
 	"github.com/tdewolff/minify"
 	"github.com/tdewolff/minify/js"
 )
