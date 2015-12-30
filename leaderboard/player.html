@@ -82,7 +82,6 @@
             content += "Bye";
           } else {
             rating += player.rating;
-            ratings.push([new Date(stubs[i].match.end_time*1000), rating]);
             var color, sign;
             if (player.rating >= 0) {
               color = "green";
@@ -97,6 +96,7 @@
               Math.floor(player.rating * 10.0) / 10.0 + "</span>)";
           }
         }
+        ratings.push([new Date(stubs[i].match.end_time*1000), rating]);
         stubs[i].td.innerHTML = content;
       }
 
